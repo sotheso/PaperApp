@@ -11,7 +11,7 @@ import Firebase
 
 @main
 struct PaperAppApp: App {
-    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+//    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
     init() {
         FirebaseApp.configure()
