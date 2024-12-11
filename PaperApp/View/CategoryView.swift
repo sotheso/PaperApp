@@ -46,14 +46,9 @@ struct CategoryView: View {
                         .offset(y: (scrollOffset + topInset) > 0 ? (scrollOffset + topInset) : 0)
                         .zIndex(1000)
                     
-                    LazyVStack(alignment: .leading){
-                        Text("paper")
-                            .font(.caption2)
-                            .foregroundStyle(.gray)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                    }
-                    .padding(15)
-                    .zIndex(0)
+                    GradView()
+                        .padding(10)
+                        .zIndex(0)
                 }
             }
             .animation(.easeInOut(duration: 0.2), value: isSearchActive)
@@ -152,6 +147,18 @@ struct CustomTabBar: View {
     }
 }
 
+struct GradView: View {
+    var body: some View {
+        LazyVGrid(columns: Array(repeating: GridItem(), count: 2)) {
+            ForEach(0..<25) { item in
+                RoundedRectangle(cornerRadius: 20)
+                    .frame(width: 180, height: 220)
+                    .foregroundStyle(.ultraThinMaterial)
+            }
+        }
+        .padding(.horizontal, 10)
+    }
+}
 #Preview {
     CategoryView()
 }
