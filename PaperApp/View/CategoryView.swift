@@ -18,27 +18,62 @@ struct CategoryView: View {
     @State private var scrollOffset: CGFloat = 0
     @State private var topInset: CGFloat = 0
     
+    @State private var startTopInsert: CGFloat = 0
+    
     var body: some View {
         NavigationStack{
             ScrollView(.vertical){
                 VStack(spacing: 0){
                     CustomTabBar(activeTab: $activeTab)
-                        .offset(y: scrollOffset > 0 ? scrollOffset : 0)
+// برای موقعی که سرچ میکنی قسمت های دستبندی حذف بشه
+                        .frame(height: isSearchActive ? 0 : nil, alignment: .top)
+                        .opacity(isSearchActive ? 0 : 10)
+                        .padding(.bottom, isSearchActive ? 0 : 10)
+                        .background{
+                            let progress = min(max((scrollOffset + startTopInsert - 110) / 15, 0), 1)
+                            
+                            ZStack(alignment: .bottom){
+                                Rectangle()
+                                    .fill(.ultraThinMaterial)
+                                
+                                Rectangle()
+                                    .fill(.gray.opacity(0.3))
+                                    .frame(height: 1)
+                            }
+                            .padding(.top, -topInset)
+                            .padding(progress)
+                        }
+                        .offset(y: (scrollOffset + topInset) > 0 ? (scrollOffset + topInset) : 0)
+                        .zIndex(1000)
+                    
+                    LazyVStack(alignment: .leading){
+                        Text("paper")
+                            .font(.caption2)
+                            .foregroundStyle(.gray)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .padding(15)
+                    .zIndex(0)
                 }
             }
+            .animation(.easeInOut(duration: 0.2), value: isSearchActive)
 // برای چسبیدن دسته ها به بالای صفحه موقع اسکرول کردن
             .onScrollGeometryChange(for: CGFloat.self, of: {
-                $0.contentOffset.y + $0.contentInsets.top
+                $0.contentOffset.y
             }, action: { oldValue , newValue in
                 scrollOffset = newValue
             })
             .onScrollGeometryChange(for: CGFloat.self, of: {
                 $0.contentInsets.top
             }, action: { oldValue , newValue in
-                scrollOffset = newValue
+                if startTopInsert == .zero {
+                    startTopInsert = newValue
+                }
+                topInset = newValue
             })
             .navigationTitle("Category View")
             .searchable(text: $searchText, isPresented: $isSearchActive, placement: .navigationBarDrawer(displayMode: .automatic))
+            .toolbarBackgroundVisibility(.hidden, for: .navigationBar)
         }
         
     }
