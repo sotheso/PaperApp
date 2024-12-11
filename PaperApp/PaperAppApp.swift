@@ -26,7 +26,8 @@ struct PaperAppApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            CategoryView()
+
         }
     }
 }

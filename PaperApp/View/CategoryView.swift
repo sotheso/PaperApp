@@ -8,18 +8,35 @@
 import SwiftUI
 
 
+@available(iOS 18.0, *)
 struct CategoryView: View {
     @State private var searchText: String = ""
     @State private var isSearchActive: Bool = false
     
     @State private var activeTab: CategoryMod = .All
+    
+    @State private var scrollOffset: CGFloat = 0
+    @State private var topInset: CGFloat = 0
+    
     var body: some View {
         NavigationStack{
             ScrollView(.vertical){
                 VStack(spacing: 0){
                     CustomTabBar(activeTab: $activeTab)
+                        .offset(y: scrollOffset > 0 ? scrollOffset : 0)
                 }
             }
+// برای چسبیدن دسته ها به بالای صفحه موقع اسکرول کردن
+            .onScrollGeometryChange(for: CGFloat.self, of: {
+                $0.contentOffset.y + $0.contentInsets.top
+            }, action: { oldValue , newValue in
+                scrollOffset = newValue
+            })
+            .onScrollGeometryChange(for: CGFloat.self, of: {
+                $0.contentInsets.top
+            }, action: { oldValue , newValue in
+                scrollOffset = newValue
+            })
             .navigationTitle("Category View")
             .searchable(text: $searchText, isPresented: $isSearchActive, placement: .navigationBarDrawer(displayMode: .automatic))
         }
