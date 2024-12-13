@@ -25,7 +25,6 @@ struct CategoryView: View {
             ScrollView(.vertical){
                 VStack(spacing: 0){
                     CustomTabBar(activeTab: $activeTab)
-// برای موقعی که سرچ میکنی قسمت های دستبندی حذف بشه
                         .frame(height: isSearchActive ? 0 : nil, alignment: .top)
                         .opacity(isSearchActive ? 0 : 10)
                         .padding(.bottom, isSearchActive ? 0 : 10)
