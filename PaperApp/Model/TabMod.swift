@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-enum Tab: String , CaseIterable {
+enum TabMod: String , CaseIterable {
     case home = "house"
     case category = "map.fill"
     case notification = "bell"
