@@ -6,13 +6,25 @@
 //
 
 import SwiftUI
+//
+//struct ContentView: View {
+//    @AppStorage("isLoggedIn") private var isLoggedIn = false
+//    
+//    var body: some View {
+//        VStack {
+//            test(isLoggedIn: $isLoggedIn)
+//        }
+//        .padding()
+//    }
+//}
 
 struct ContentView: View {
     @AppStorage("isLoggedIn") private var isLoggedIn = false
+    @EnvironmentObject var viewModel: ViewModel  // Add this line
     
     var body: some View {
         VStack {
-            LoginView(isLoggedIn: $isLoggedIn)
+            test(isLoggedIn: $isLoggedIn)
         }
         .padding()
     }
@@ -20,5 +32,6 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
+        .environmentObject(ViewModel(servise: AppService()))
 }
 

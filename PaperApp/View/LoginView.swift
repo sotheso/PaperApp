@@ -2,144 +2,247 @@
 //  LoginView.swift
 //  PaperApp
 //
-//  Created by Sothesom on 20/09/1403.
+//  Created by Sothesom on 01/10/1403.
 //
 
 import SwiftUI
-import FirebaseAuth
-import FirebaseFirestore
+
+enum FocusedField {
+    case email
+    case password
+}
 
 struct LoginView: View {
-    @Binding var isLoggedIn: Bool
+    @EnvironmentObject var viewModel: ViewModel
+    @State private var emailText = ""
+    @State private var passwordText = ""
 
-    @State private var email = ""
-    @State private var password = ""
-    @State private var username = ""
-    @State private var isSignUp = false
-    @State private var errorMessage = ""
+    @FocusState private var focusedField: FocusedField?
+    @State private var isValidEmail = true
+    @State private var isValidPassword = true
     
-    // برای هدایت به HomeView
+    @State private var showSheet = false
+
+    // بررسی پر بودن ایمیل و رمز عبور for bottom Sign in
+    var canProceed: Bool {
+//        isValidEmail && isValidPassword
+        Validator.validateEmail(emailText) && Validator.validatePassword(passwordText)
+    }
 
     var body: some View {
-        NavigationStack {
-            VStack {
-                if isSignUp {
-                    TextField("Username", text: $username)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .padding()
+        NavigationStack{
+            if viewModel.isLoading {
+                ProgressView()
+            }
+            VStack{
+                Text("Login here")
+                    .font(.system(size: 30, weight: .bold))
+                    .foregroundColor(Color("ColorBlue"))
+                    .padding(.bottom)
+                Text("Wellcom im my app ....\n aasfdf fgasfg sdf")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.black)
+                    .multilineTextAlignment(.center)
+                    .padding(.bottom, 80)
+                
+                
+                EmailTextField(emailText: $emailText, isValidEmail: $isValidEmail)
+                
+                
+                PasswordTextField(passwordText: $passwordText, isValidPassword: $isValidPassword,validatePassword: Validator.validatePassword, errorText: "Your password is not valid", placehorder: "Password")
+                
+                
+                HStack{
+                    Spacer()
+                    Button{
+                        
+                    } label: {
+                        Text("Forget password")
+                            .foregroundColor(Color("ColorBlue"))
+                            .font(.system(size: 14, weight: .semibold))
+                    }
+                    .padding(.trailing)
+                    .padding(.vertical)
                 }
                 
-                TextField("Email", text: $email)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding()
-
-                SecureField("Password", text: $password)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding()
-                Button(isSignUp ? "Sign Up" : "Login") {
-                    if isSignUp {
-                        signUp(email: email, password: password, username: username) { result in
-                            switch result {
-                            case .success(let message):
-                                errorMessage = message
-                                isLoggedIn = false // جلوگیری از ورود
-                            case .failure(let error):
-                                errorMessage = error.localizedDescription
-                            }
-                        }
-                    } else {
-                        login(email: email, password: password) { result in
-                            switch result {
-                            case .success(let isVerified):
-                                if isVerified {
-                                    isLoggedIn = true // هدایت به HomeView
-                                } else {
-                                    errorMessage = "Please verify your email before logging in."
-                                }
-                            case .failure(let error):
-                                errorMessage = error.localizedDescription
-                            }
-                        }
-                    }
-                }
-                .padding()
-                .background(Color.blue)
-                .foregroundColor(.white)
-                .cornerRadius(10)
-
-                Text(errorMessage)
-                    .foregroundColor(.red)
-                    .padding()
-
-                Button(isSignUp ? "Already have an account? Login" : "Don't have an account? Sign Up") {
-                    isSignUp.toggle()
-                }
-                .padding(.top, 20)
                 
-                // هدایت به HomeView با NavigationLink جدید
-                NavigationLink(value: isLoggedIn, label: {
-                    EmptyView()
-                })
-            }
-            .navigationDestination(isPresented: $isLoggedIn) {
-                AsliView()
-                    .navigationBarBackButtonHidden()
-            }
-            .padding()
-        }
-    }
-}
-func login(email: String, password: String, completion: @escaping (Result<Bool, Error>) -> Void) {
-    Auth.auth().signIn(withEmail: email, password: password) { authResult, error in
-        if let error = error {
-            completion(.failure(error))
-        } else if let user = authResult?.user {
-            user.reload { error in
-                if let error = error {
-                    completion(.failure(error))
-                } else {
-                    if user.isEmailVerified {
-                        completion(.success(true)) // ایمیل تأیید شده
-                    } else {
-                        completion(.success(false)) // ایمیل تأیید نشده
+                Button{
+                    Task {
+                        try? await viewModel.login(email: emailText, password: passwordText)
                     }
+                }label: {
+                    Text("Sign in")
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundColor(.white)
                 }
+                .padding(.vertical)
+                .frame(maxWidth: .infinity)
+                .background(Color("ColorBlue"))
+                .cornerRadius(12)
+                .padding(.horizontal)
+                .opacity(canProceed ? 1.0 : 0.5)
+                .disabled(!canProceed)
+                
+                
+                Button{
+                    showSheet.toggle()
+                }label: {
+                    Text("Create new account")
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundColor(Color("ColorGray"))
+                }
+                .padding(.vertical)
+                .frame(maxWidth: .infinity)
+                
+                .cornerRadius(12)
+                .padding([.horizontal, .vertical])
+                
+                
+                BottomView(googleAction: {}, facebookAction: {}, appleAction: {})
             }
+            .opacity(viewModel.isLoading ? 0.5 : 1.0)
         }
-    }
-}
-
-func signUp(email: String, password: String, username: String, completion: @escaping (Result<String, Error>) -> Void) {
-    Auth.auth().createUser(withEmail: email, password: password) { authResult, error in
-        if let error = error {
-            completion(.failure(error))
-        } else if let user = authResult?.user {
-            // ذخیره اطلاعات کاربر در Firestore
-            let db = Firestore.firestore()
-            db.collection("users").document(user.uid).setData([
-                "email": email,
-                "username": username
-            ]) { error in
-                if let error = error {
-                    completion(.failure(error))
-                } else {
-                    // ارسال ایمیل تأیید
-                    user.sendEmailVerification { error in
-                        if let error = error {
-                            print("Error sending email verification: \(error.localizedDescription)")
-                            completion(.failure(error))
-                        } else {
-                            print("Verification email sent successfully!")
-                            completion(.success("Account created! Please verify your email before logging in."))
-                                
-                        }
-                    }
-                }
+        .alert("Error", isPresented: $viewModel.showAlert) {
+            Button("Ok") {
+                isValidEmail = false
+                isValidPassword = false
+                emailText = ""
+                passwordText = ""
             }
+        } message: {
+            Text(viewModel.alterMasseg)
+        }
+        .sheet(isPresented: $showSheet) {
+            RegistrationView()
         }
     }
 }
 
 #Preview {
-    LoginView(isLoggedIn: .constant(false))
+    LoginView()
+        .environmentObject(ViewModel(servise: AppService())) 
+}
+
+
+struct BottomView: View {
+    var googleAction: () -> Void
+    var facebookAction: () -> Void
+    var appleAction: () -> Void
+
+    
+    
+    var body: some View {
+        VStack{
+            Text("Or continue with")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(Color("ColorBlue"))
+                .padding(.bottom)
+            
+            HStack{
+                Button{
+                    googleAction()
+                } label: {
+                    Image("google-logo")
+                }
+                .iconButtonStyle
+                
+                Button{
+                    facebookAction()
+                } label: {
+                    Image("facebook-logo")
+                }
+                .iconButtonStyle
+                
+                Button{
+                    appleAction()
+                } label: {
+                    Image("apple-logo")
+                }
+                .iconButtonStyle
+            }
+        }
+    }
+}
+
+extension View {
+    var iconButtonStyle: some View {
+        self
+            .padding()
+            .background(Color("ColorLightGray"))
+            .cornerRadius(8)
+    }
+}
+
+
+struct EmailTextField: View {
+    @Binding var emailText: String
+    @Binding var isValidEmail: Bool
+    
+    @FocusState var focusedField: FocusedField?
+    
+    var body: some View {
+        VStack{
+            TextField("Email", text: $emailText)
+                .focused($focusedField, equals: .email)
+                .padding()
+                .background(Color("ColorBlue2"))
+                .cornerRadius(12)
+                .background{
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke( !isValidEmail ? .red : focusedField == .email ?  Color("ColorBlue"): .white, lineWidth: 3)
+                }
+                .padding(.horizontal)
+                .onChange(of: emailText){ newValue in
+                    isValidEmail = Validator.validateEmail(newValue)
+                }
+                .padding(.bottom, isValidEmail ? 16 : 0)
+
+            
+            if !isValidEmail {
+                HStack{
+                    Text("your email is not Valid")
+                        .foregroundColor(.red)
+                        .padding(.leading)
+                    Spacer()
+                }
+                .padding(.bottom)
+            }
+        }
+    }
+}
+
+
+struct PasswordTextField :View {
+    @Binding var passwordText: String
+    @Binding var isValidPassword: Bool
+    let validatePassword: (String) -> Bool
+    let errorText: String
+    let placehorder: String
+    
+    @FocusState var focusedField: FocusedField?
+    
+    var body: some View {
+        SecureField(placehorder, text: $passwordText)
+            .focused($focusedField, equals: .password)
+            .padding()
+            .background(Color("ColorBlue2"))
+            .cornerRadius(12)
+            .background{
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke( !isValidPassword ? .red : focusedField == .password ?  Color("ColorBlue"): .white, lineWidth: 3)
+            }
+            .padding(.horizontal)
+            .onChange(of: passwordText){ newValue in
+                isValidPassword = validatePassword(newValue)
+            }
+        
+        if !isValidPassword {
+            HStack{
+                Text(errorText)
+                    .foregroundColor(.red)
+                    .padding(.leading)
+                Spacer()
+            }
+        }
+    }
 }
