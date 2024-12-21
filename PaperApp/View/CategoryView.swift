@@ -27,7 +27,7 @@ struct CategoryView: View {
                     CustomTabBar(activeTab: $activeTab)
                         .frame(height: isSearchActive ? 0 : nil, alignment: .top)
                         .opacity(isSearchActive ? 0 : 10)
-                        .padding(.bottom, isSearchActive ? 0 : 10)
+                        .padding(.vertical, isSearchActive ? 0 : 10)
                         .background{
                             let progress = min(max((scrollOffset + startTopInsert - 110) / 15, 0), 1)
                             
@@ -42,7 +42,6 @@ struct CategoryView: View {
                             .padding(.top, -topInset)
                             .padding(progress)
                         }
-                        .edgesIgnoringSafeArea(.top)
                         .offset(y: (scrollOffset + topInset) > 0 ? (scrollOffset + topInset) : 0)
                         .zIndex(1000)
                     
@@ -53,9 +52,7 @@ struct CategoryView: View {
             }
             .animation(.easeInOut(duration: 0.2), value: isSearchActive)
             .navigationTitle("Category View")
-//            .navigationBarTitleDisplayMode(.automatic) // Add this line
             .searchable(text: $searchText, isPresented: $isSearchActive, placement: .navigationBarDrawer(displayMode: .automatic))
-//            .toolbarBackground(.visible, for: .navigationBar)
 // برای چسبیدن دسته ها به بالای صفحه موقع اسکرول کردن
             .onScrollGeometryChange(for: CGFloat.self, of: {
                 $0.contentOffset.y

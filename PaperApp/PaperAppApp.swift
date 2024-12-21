@@ -12,6 +12,8 @@ import Firebase
 @main
 struct PaperAppApp: App {
 //    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    @AppStorage("isDarkMode") private var isDarkMode = false
+    @AppStorage("isLoggedIn") private var isLoggedIn = false
 
     init() {
         FirebaseApp.configure()
@@ -26,8 +28,13 @@ struct PaperAppApp: App {
 
     var body: some Scene {
         WindowGroup {
-//            LoginView()
-            AsliView()
+            if isLoggedIn {
+                AsliView()
+                    .preferredColorScheme(isDarkMode ? .dark : .light)
+            } else {
+                LoginView(isLoggedIn: $isLoggedIn)
+                    .preferredColorScheme(isDarkMode ? .dark : .light)
+            }
         }
     }
 }

@@ -10,6 +10,8 @@ import FirebaseAuth
 import FirebaseFirestore
 
 struct LoginView: View {
+    @Binding var isLoggedIn: Bool
+
     @State private var email = ""
     @State private var password = ""
     @State private var username = ""
@@ -17,7 +19,6 @@ struct LoginView: View {
     @State private var errorMessage = ""
     
     // برای هدایت به HomeView
-    @State private var isLoggedIn = false
 
     var body: some View {
         NavigationStack {
@@ -140,5 +141,5 @@ func signUp(email: String, password: String, username: String, completion: @esca
 }
 
 #Preview {
-    LoginView()
+    LoginView(isLoggedIn: .constant(false))
 }
