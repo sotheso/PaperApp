@@ -16,7 +16,7 @@ struct CategoryView: View {
     @State private var activeTab: CategoryMod = .All
     
     @State private var scrollOffset: CGFloat = 0
-    @State private var topInset: CGFloat = 0
+    @State private var topInset: CGFloat = 10
     
     @State private var startTopInsert: CGFloat = 0
     
@@ -42,6 +42,7 @@ struct CategoryView: View {
                             .padding(.top, -topInset)
                             .padding(progress)
                         }
+                        .edgesIgnoringSafeArea(.top)
                         .offset(y: (scrollOffset + topInset) > 0 ? (scrollOffset + topInset) : 0)
                         .zIndex(1000)
                     
@@ -51,6 +52,10 @@ struct CategoryView: View {
                 }
             }
             .animation(.easeInOut(duration: 0.2), value: isSearchActive)
+            .navigationTitle("Category View")
+//            .navigationBarTitleDisplayMode(.automatic) // Add this line
+            .searchable(text: $searchText, isPresented: $isSearchActive, placement: .navigationBarDrawer(displayMode: .automatic))
+//            .toolbarBackground(.visible, for: .navigationBar)
 // برای چسبیدن دسته ها به بالای صفحه موقع اسکرول کردن
             .onScrollGeometryChange(for: CGFloat.self, of: {
                 $0.contentOffset.y
@@ -65,9 +70,6 @@ struct CategoryView: View {
                 }
                 topInset = newValue
             })
-            .navigationTitle("Category View")
-            .searchable(text: $searchText, isPresented: $isSearchActive, placement: .navigationBarDrawer(displayMode: .automatic))
-            .toolbarBackgroundVisibility(.hidden, for: .navigationBar)
         }
         
     }

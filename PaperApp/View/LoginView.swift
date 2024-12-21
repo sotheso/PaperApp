@@ -81,7 +81,8 @@ struct LoginView: View {
                 })
             }
             .navigationDestination(isPresented: $isLoggedIn) {
-                HomeView()
+                AsliView()
+                    .navigationBarBackButtonHidden()
             }
             .padding()
         }

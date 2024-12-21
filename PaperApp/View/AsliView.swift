@@ -7,9 +7,12 @@
 
 import SwiftUI
 
-struct TabsView: View {
+struct AsliView: View {
     @State private var activeTab : TabMod = .home
     @State private var isTabBarHidden : Bool = false
+    
+    @State private var searchText: String = ""
+    @State private var isSearchActive: Bool = false
     
     var body: some View {
         ZStack(alignment: .bottom){
@@ -17,13 +20,14 @@ struct TabsView: View {
                 if #available(iOS 18, *) {
                     TabView(selection: $activeTab) {
                         Tab.init(value: .home){
-                            Text("home")
+                            HomeView()
                                 .toolbarVisibility(.hidden, for: .tabBar)
                         }
                         
                         Tab.init(value: .category){
-                            Text("category")
+                            CategoryView()
                                 .toolbarVisibility(.hidden, for: .tabBar)
+//                                .toolbarVisibility(.hidden, for: .navigationBar)
                         }
                         
                         Tab.init(value: .notification){
@@ -32,37 +36,36 @@ struct TabsView: View {
                         }
                         
                         Tab.init(value: .setting){
-                            Text("setting")
+                            SettingView()
                                 .toolbarVisibility(.hidden, for: .tabBar)
                         }
                     }
+                    .ignoresSafeArea(.all)
                 } else {
-                    TabView(selection: $activeTab){
-                        Text("home")
-                            .tag(TabMod.home)
-                            .background{
-                                if !isTabBarHidden {
-                                    HideTabBar{
-                                        print("Hidden")
-                                        isTabBarHidden = true
-                                    }
-                                }
-                            }
-                        
-                        Text("category")
-                            .tag(TabMod.category)
-                        
-                        
-                        Text("nofit")
-                            .tag(TabMod.notification)
-                        
-                        
-                        Text("setting")
-                            .tag(TabMod.setting)
-                    }
+//                    TabView(selection: $activeTab){
+//                        Text("home")
+//                            .tag(TabMod.home)
+//                            .background{
+//                                if !isTabBarHidden {
+//                                    HideTabBar{
+//                                        print("Hidden")
+//                                        isTabBarHidden = true
+//                                    }
+//                                }
+//                            }
+//                        
+//                        Text("category")
+//                            .tag(TabMod.category)
+//                        
+//                        
+//                        Text("nofit")
+//                            .tag(TabMod.notification)
+//                        
+//                        
+//                        SettingView()
+//                            .tag(TabMod.setting)
                 }
             }
-            
             CustomTabBars(activeTab: $activeTab)
         }
     }
@@ -97,5 +100,5 @@ extension UIView {
     }
 }
 #Preview {
-    TabsView()
+    AsliView()
 }

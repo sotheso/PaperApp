@@ -11,11 +11,13 @@ struct CustomTabBars: View {
     var activeForgraound: Color = .white
     var activeBackground: Color = .blue
     
+    
     @Binding var activeTab: TabMod
     // For gemetry effect
     @Namespace private var animation
     
-    @State private var tabLocation: CGRect = .zero
+    @State private var tabLocation: CGRect = CGRect(x: 0, y: 0, width: 50, height: 30) // مقدار پیش‌فرض
+    
     
     var body: some View {
         
@@ -61,6 +63,7 @@ struct CustomTabBars: View {
                     .buttonStyle(.plain)
                 }
             }
+            .edgesIgnoringSafeArea(.bottom) 
             .background(alignment: .leading){
                 Capsule()
                     .fill(activeBackground.gradient)
@@ -95,9 +98,10 @@ struct CustomTabBars: View {
         }
         .padding(.bottom, 5)
         .animation(.smooth(duration: 0.3, extraBounce: 0), value: activeTab)
+        
     }
 }
 
 #Preview {
-    TabsView()
+    AsliView()
 }
